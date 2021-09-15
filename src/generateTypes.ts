@@ -12,7 +12,9 @@ interface Model {
   name: string
   fields: {
     name: string
-    typeAnnotation: string
+    typeAnnotation: string,
+    required: boolean,
+    isArray: boolean
   }[]
 }
 
@@ -47,7 +49,9 @@ function distillDMMF (dmmf: DMMF.Document): TypeTransfer {
       name: model.name,
       fields: model.fields.map(f => ({
         name: f.name,
-        typeAnnotation: f.type
+        typeAnnotation: f.type,
+        required: f.isRequired,
+        isArray: f.isList
       }))
     })
   })
@@ -97,7 +101,7 @@ ${prismaEnum.values.map(value => `    ${value},`).join('\n')}
 
 ${types.models.map(model => `
 export interface ${model.name} {
-${model.fields.map(field => `    ${field.name}: ${field.typeAnnotation},`).join('\n')}
+${model.fields.map(field => `    ${field.name}${field.required ? '' : '?'}: ${field.typeAnnotation}${field.isArray ? '[]' : ''},`).join('\n')}
 }`).join('\n')}
 `
   return fileContents
