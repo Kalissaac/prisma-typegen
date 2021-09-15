@@ -1,4 +1,5 @@
 import {Command, flags} from '@oclif/command'
+import { getDMMF } from '@prisma/sdk'
 
 class PrismaTypegen extends Command {
   static description = 'describe the command here'
@@ -23,6 +24,7 @@ class PrismaTypegen extends Command {
     if (args.file && flags.force) {
       this.log(`you input --force and --file: ${args.file}`)
     }
+    const dmmf = await getDMMF({ datamodel: "model User { id String @id }" })
   }
 }
 
