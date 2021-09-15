@@ -15,15 +15,8 @@
 # Usage
 <!-- usage -->
 ```sh-session
-$ npm install -g @kalissaac/prisma-typegen
-$ prisma-typegen COMMAND
-running command...
-$ prisma-typegen (-v|--version|version)
-@kalissaac/prisma-typegen/0.0.0 darwin-arm64 node-v14.17.6
-$ prisma-typegen --help [COMMAND]
-USAGE
-  $ prisma-typegen COMMAND
-...
+$ npx @kalissaac/prisma-typegen <output folder> <prisma schema file>
+$ npx @kalissaac/prisma-typegen ./interfaces ./schema.prisma
 ```
 <!-- usagestop -->
 # Commands
