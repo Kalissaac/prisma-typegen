@@ -1,7 +1,7 @@
 {
   "name": "@kalissaac/prisma-typegen",
   "description": "Generates full types (including relations) for TypeScript from a Prisma schema",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "author": "Kalissaac @Kalissaac",
   "bin": {
     "prisma-typegen": "./bin/run"
