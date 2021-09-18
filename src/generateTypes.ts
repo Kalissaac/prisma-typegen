@@ -1,5 +1,5 @@
 import { getDMMF } from '@prisma/sdk'
-import { mkdirSync, writeFileSync } from 'fs'
+import { mkdir, writeFile } from 'fs/promises'
 import { join } from 'path'
 import type { DMMF } from '@prisma/generator-helper';
 
@@ -108,8 +108,12 @@ ${model.fields.map(field => `    ${field.name}${field.required ? '' : '?'}: ${fi
 }
 
 async function writeToFile (contents: string, outputPath: string) {
-  mkdirSync(outputPath, { recursive: true })
-  writeFileSync(join(outputPath, 'index.d.ts'), contents, {
-    encoding: 'utf8'
-  })
+  try {
+    await mkdir(outputPath, { recursive: true })
+    await writeFile(join(outputPath, 'index.d.ts'), contents, {
+      encoding: 'utf8'
+    })
+  } catch (e) {
+    console.error(e)
+  }
 }
