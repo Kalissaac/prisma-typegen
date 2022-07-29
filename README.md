@@ -1,26 +1,22 @@
-@kalissaac/prisma-typegen
-=========================
+# @kalissaac/prisma-typegen
 
 Generates full types (including relations) for TypeScript from a Prisma schema
 
-[![oclif](https://img.shields.io/badge/cli-oclif-brightgreen.svg)](https://oclif.io)
-[![Version](https://img.shields.io/npm/v/@kalissaac/prisma-typegen.svg)](https://npmjs.org/package/@kalissaac/prisma-typegen)
-[![Downloads/week](https://img.shields.io/npm/dw/@kalissaac/prisma-typegen.svg)](https://npmjs.org/package/@kalissaac/prisma-typegen)
-[![License](https://img.shields.io/npm/l/@kalissaac/prisma-typegen.svg)](https://github.com/Kalissaac/prisma-typegen/blob/master/package.json)
-
-<!-- toc -->
-* [Usage](#usage)
-<!-- tocstop -->
 # Usage
-<!-- usage -->
+
 ```sh-session
-$ npx @kalissaac/prisma-typegen <output folder> <prisma schema file>
+$ npx @kalissaac/prisma-typegen <output folder> [prisma schema file] [--onlyDeclarations]
 $ npx @kalissaac/prisma-typegen ./interfaces ./schema.prisma
 ```
-<!-- usagestop -->
+
+### Only output declarations
+
+If using JavaScript instead of TypeScript, pass `--onlyDeclarations` to allow the types to be used with JSDoc.
 
 # Example
+
 ### Input Schema
+
 ```prisma
 datasource db {
   url      = env("DATABASE_URL")
@@ -56,30 +52,30 @@ enum Role {
 }
 ```
 
-### Generated `index.d.ts`
+### Generated `index.ts` (or `index.d.ts`)
+
 ```typescript
 export enum Role {
-    USER,
-    ADMIN,
+  USER,
+  ADMIN
 }
 
-
 export interface User {
-    id: number,
-    createdAt: Date,
-    email: string,
-    name: string,
-    role: Role,
-    posts: Post,
+  id: number
+  createdAt: Date
+  email: string
+  name: string
+  role: Role
+  posts: Post
 }
 
 export interface Post {
-    id: number,
-    createdAt: Date,
-    updatedAt: Date,
-    published: boolean,
-    title: string,
-    author: User,
-    authorId: number,
+  id: number
+  createdAt: Date
+  updatedAt: Date
+  published: boolean
+  title: string
+  author: User
+  authorId: number
 }
 ```

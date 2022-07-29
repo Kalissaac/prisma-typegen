@@ -1,67 +1,55 @@
-import { Command, flags } from '@oclif/command'
-import generateTypes from './generateTypes'
-import cli from 'cli-ux'
+#!/usr/bin/env node
+
+import generateTypes from './generateTypes.js'
 import { access } from 'fs/promises'
 import { constants } from 'fs'
+import { exit } from 'process'
 
-class PrismaTypegen extends Command {
-  static description = `Generates full types (including relations) for TypeScript from a Prisma schema
-e.g. npx @kalissaac/prisma-typegen ./interfaces/prisma ./schema.prisma`
+const argv = process.argv.slice(2)
 
-  static flags = {
-    // add --version flag to show CLI version
-    version: flags.version({ char: 'v' }),
-    help: flags.help({ char: 'h' }),
-  }
-
-  static args = [
-    {
-      name: 'outputPath',
-      required: true,
-      description: 'Path to output the generated types (the index.d.ts file)',
-    },
-    {
-      name: 'schema',
-      required: false,
-      description: 'Path to the schema file (schema.prisma)',
-    }
-  ]
-
-  async run () {
-    const { args } = this.parse(PrismaTypegen)
-
-    let outputPath = args.outputPath
-    let schemaLocation = args.schema
-
-    if (!outputPath) {
-      this.error('Output path is required')
-    }
-    if (!schemaLocation) {
-      cli.action.start('Looking for schema.prisma')
-      try {
-        await access('./schema.prisma', constants.R_OK)
-        schemaLocation = './schema.prisma'
-      } catch {
-        try {
-          await access('./prisma/schema.prisma', constants.R_OK)
-          schemaLocation = './prisma/schema.prisma'
-        } catch {
-          this.error('Schema file is required and could not be found')
-        }
-      }
-      cli.action.stop()
-    }
-
-    try {
-      cli.action.start('Generating types')
-      await generateTypes(schemaLocation, outputPath)
-      cli.action.stop()
-      this.log('Done!')
-    } catch (e) {
-      cli.action.stop()
-      this.error(e as string)
-    }
-  }
+if (argv.length < 1) {
+  console.error('Output path is required')
+  exit(1)
 }
 
-export = PrismaTypegen
+if (argv[0] === 'help' || argv[0] === '--help') {
+  console.log(`@kalissaac/prisma-typegen
+  Usage: <output path> [prisma schema file]
+
+  Options:
+    --declarationsOnly  Output type declarations only instead of full TypeScript file
+  `)
+  exit(0)
+}
+
+const outputPath = argv[0]
+
+let schemaLocation: string
+if (argv.length < 2 || argv[1] === '--declarationsOnly') {
+  console.log('Looking for schema.prisma')
+  try {
+    await access('./schema.prisma', constants.R_OK)
+    schemaLocation = './schema.prisma'
+  } catch {
+    try {
+      await access('./prisma/schema.prisma', constants.R_OK)
+      schemaLocation = './prisma/schema.prisma'
+    } catch {
+      console.error('Schema file is required and could not be found')
+      exit(1)
+    }
+  }
+} else {
+  schemaLocation = argv[1]
+}
+
+let declarationsOnly = argv.includes('--declarationsOnly')
+
+try {
+  console.log('Generating types...')
+  await generateTypes(schemaLocation, outputPath, declarationsOnly)
+  console.log('Done!')
+} catch (e) {
+  console.error(e)
+  exit(1)
+}

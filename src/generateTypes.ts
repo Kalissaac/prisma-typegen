@@ -1,7 +1,8 @@
-import { getDMMF } from '@prisma/sdk'
+import prismaInternals from '@prisma/internals'
 import { mkdir, writeFile } from 'fs/promises'
 import { join } from 'path'
-import type { DMMF } from '@prisma/generator-helper';
+import type { DMMF } from '@prisma/generator-helper'
+const { getDMMF } = prismaInternals
 
 interface TypeTransfer {
   models: Model[]
@@ -12,8 +13,8 @@ interface Model {
   name: string
   fields: {
     name: string
-    typeAnnotation: string,
-    required: boolean,
+    typeAnnotation: string
+    required: boolean
     isArray: boolean
   }[]
 }
@@ -23,15 +24,24 @@ interface Enum {
   values: string[]
 }
 
-export default async function generateTypes (schemaPath: string, outputPath: string) {
+/**
+ * @param schemaPath Path to Prisma schema file
+ * @param outputPath Path to output directory
+ * @param generateDeclarations Whether to just generate type declarations or to generate a full TypeScript file
+ */
+export default async function generateTypes(
+  schemaPath: string,
+  outputPath: string,
+  generateDeclarations: boolean = false
+) {
   const dmmf = await getDMMF({ datamodelPath: schemaPath })
   let types = distillDMMF(dmmf)
   types = convertPrismaTypesToJSTypes(types)
   const fileContents = createTypeFileContents(types)
-  writeToFile(fileContents, outputPath)
+  writeToFile(fileContents, outputPath, generateDeclarations)
 }
 
-function distillDMMF (dmmf: DMMF.Document): TypeTransfer {
+function distillDMMF(dmmf: DMMF.Document): TypeTransfer {
   const types: TypeTransfer = {
     models: [],
     enums: []
@@ -71,7 +81,7 @@ const PrismaTypesMap = new Map([
   ['Bytes', 'Buffer']
 ])
 
-function convertPrismaTypesToJSTypes (types: TypeTransfer): TypeTransfer {
+function convertPrismaTypesToJSTypes(types: TypeTransfer): TypeTransfer {
   const models = types.models.map(model => {
     const fields = model.fields.map(field => ({
       ...field,
@@ -90,27 +100,37 @@ function convertPrismaTypesToJSTypes (types: TypeTransfer): TypeTransfer {
   }
 }
 
-function createTypeFileContents (types: TypeTransfer): string {
+function createTypeFileContents(types: TypeTransfer): string {
   let fileContents = `// AUTO GENERATED FILE BY @kalissaac/prisma-typegen
 // DO NOT EDIT
 
-${types.enums.map(prismaEnum => `
+${types.enums
+  .map(
+    prismaEnum => `
 export enum ${prismaEnum.name} {
 ${prismaEnum.values.map(value => `    ${value},`).join('\n')}
-}`).join('\n')}
+}`
+  )
+  .join('\n')}
 
-${types.models.map(model => `
+${types.models
+  .map(
+    model => `
 export interface ${model.name} {
-${model.fields.map(field => `    ${field.name}${field.required ? '' : '?'}: ${field.typeAnnotation}${field.isArray ? '[]' : ''},`).join('\n')}
-}`).join('\n')}
+${model.fields
+  .map(field => `    ${field.name}${field.required ? '' : '?'}: ${field.typeAnnotation}${field.isArray ? '[]' : ''},`)
+  .join('\n')}
+}`
+  )
+  .join('\n')}
 `
   return fileContents
 }
 
-async function writeToFile (contents: string, outputPath: string) {
+async function writeToFile(contents: string, outputPath: string, generateDeclarations: boolean) {
   try {
     await mkdir(outputPath, { recursive: true })
-    await writeFile(join(outputPath, 'index.d.ts'), contents, {
+    await writeFile(join(outputPath, generateDeclarations ? 'index.d.ts' : 'index.ts'), contents, {
       encoding: 'utf8'
     })
   } catch (e) {
