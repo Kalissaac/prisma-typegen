@@ -108,7 +108,7 @@ ${types.enums
   .map(
     prismaEnum => `
 export enum ${prismaEnum.name} {
-${prismaEnum.values.map(value => `    ${value},`).join('\n')}
+${prismaEnum.values.map(value => `    ${value} = '${value}',`).join('\n')}
 }`
   )
   .join('\n')}
