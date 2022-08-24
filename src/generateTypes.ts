@@ -60,7 +60,7 @@ function distillDMMF(dmmf: DMMF.Document): TypeTransfer {
       fields: model.fields.map(f => ({
         name: f.name,
         typeAnnotation: f.type,
-        required: f.isRequired,
+        required: f.isRequired && !f.hasDefaultValue,
         isArray: f.isList
       }))
     })
