@@ -5,13 +5,21 @@ Generates full types (including relations) for TypeScript from a Prisma schema
 # Usage
 
 ```sh-session
-$ npx @kalissaac/prisma-typegen <output folder> [prisma schema file] [--onlyDeclarations]
+$ npx @kalissaac/prisma-typegen <output folder> [prisma schema file] [--onlyDeclarations] [--generateInsertionTypes]
 $ npx @kalissaac/prisma-typegen ./interfaces ./schema.prisma
 ```
 
 ### Only output declarations
 
 If using JavaScript instead of TypeScript, pass `--onlyDeclarations` to allow the types to be used with JSDoc.
+
+### Generate types for data to be inserted
+
+If using this package to generate types that will be assigned to data to be inserted into a database, use the `--generateInsertionTypes` flag. Using this option will result in a few differences:
+
+- Prisma `DateTime` fields are mapped to `Date | string` insead of just `Date`. This is because most database clients support inserting date fields using either the native `Date` type or an ISO 8601 compliant `string`.
+- Fields marked with a `@default` value are made optional because they are populated automatically if not provided when inserting a new data row.
+- Relation fields (marked with `@relation`) are omitted because they do not exist at the database level and therefore can't be inserted. Read more about this [here](https://www.prisma.io/docs/concepts/components/prisma-schema/relations#relation-fields)
 
 # Example
 
