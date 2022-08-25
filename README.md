@@ -64,17 +64,17 @@ enum Role {
 
 ```typescript
 export enum Role {
-  USER,
-  ADMIN
+  USER = 'USER',
+  ADMIN = 'ADMIN'
 }
 
 export interface User {
   id: number
   createdAt: Date
   email: string
-  name: string
+  name?: string
   role: Role
-  posts: Post
+  posts: Post[]
 }
 
 export interface Post {
@@ -83,7 +83,33 @@ export interface Post {
   updatedAt: Date
   published: boolean
   title: string
-  author: User
-  authorId: number
+  author?: User
+  authorId?: number
+}
+```
+
+### Generated `index.ts` (or `index.d.ts`) in insertion mode (with `--generateInsertionTypes`)
+
+```typescript
+export enum Role {
+  USER = 'USER',
+  ADMIN = 'ADMIN'
+}
+
+export interface User {
+  id?: number
+  createdAt?: Date | string
+  email: string
+  name?: string
+  role?: Role
+}
+
+export interface Post {
+  id?: number
+  createdAt?: Date | string
+  updatedAt: Date | string
+  published?: boolean
+  title: string
+  authorId?: number
 }
 ```
