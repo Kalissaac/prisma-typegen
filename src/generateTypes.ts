@@ -28,20 +28,22 @@ interface Enum {
  * @param schemaPath Path to Prisma schema file
  * @param outputPath Path to output directory
  * @param generateDeclarations Whether to just generate type declarations or to generate a full TypeScript file
+ * @param generateInsertionTypes If true, generates types for data to be inserted into a database
  */
 export default async function generateTypes(
   schemaPath: string,
   outputPath: string,
-  generateDeclarations: boolean = false
+  generateDeclarations: boolean = false,
+  generateInsertionTypes: boolean = false
 ) {
   const dmmf = await getDMMF({ datamodelPath: schemaPath })
-  let types = distillDMMF(dmmf)
-  types = convertPrismaTypesToJSTypes(types)
+  let types = distillDMMF(dmmf, generateInsertionTypes)
+  types = convertPrismaTypesToJSTypes(types, generateInsertionTypes)
   const fileContents = createTypeFileContents(types)
   writeToFile(fileContents, outputPath, generateDeclarations)
 }
 
-function distillDMMF(dmmf: DMMF.Document): TypeTransfer {
+function distillDMMF(dmmf: DMMF.Document, generateInsertionTypes: boolean): TypeTransfer {
   const types: TypeTransfer = {
     models: [],
     enums: []
@@ -57,31 +59,33 @@ function distillDMMF(dmmf: DMMF.Document): TypeTransfer {
   dmmf.datamodel.models.forEach(model => {
     types.models.push({
       name: model.name,
-      fields: model.fields.map(f => ({
-        name: f.name,
-        typeAnnotation: f.type,
-        required: f.isRequired && !f.hasDefaultValue,
-        isArray: f.isList
-      }))
+      fields: model.fields
+        .filter(f => !(f.relationName && generateInsertionTypes))
+        .map(f => ({
+          name: f.name,
+          typeAnnotation: f.type,
+          required: f.isRequired && (generateInsertionTypes ? !f.hasDefaultValue : true),
+          isArray: f.isList
+        }))
     })
   })
 
   return types
 }
 
-const PrismaTypesMap = new Map([
-  ['String', 'string'],
-  ['Boolean', 'boolean'],
-  ['Int', 'number'],
-  ['BigInt', 'number'],
-  ['Float', 'number'],
-  ['Decimal', 'number'],
-  ['DateTime', 'Date'],
-  ['Json', 'any'],
-  ['Bytes', 'Buffer']
-])
+function convertPrismaTypesToJSTypes(types: TypeTransfer, generateInsertionTypes: boolean): TypeTransfer {
+  const PrismaTypesMap = new Map([
+    ['String', 'string'],
+    ['Boolean', 'boolean'],
+    ['Int', 'number'],
+    ['BigInt', 'number'],
+    ['Float', 'number'],
+    ['Decimal', 'number'],
+    ['Json', 'any'],
+    ['Bytes', 'Buffer']
+  ])
+  PrismaTypesMap.set('DateTime', generateInsertionTypes ? 'Date | string' : 'Date')
 
-function convertPrismaTypesToJSTypes(types: TypeTransfer): TypeTransfer {
   const models = types.models.map(model => {
     const fields = model.fields.map(field => ({
       ...field,

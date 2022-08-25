@@ -17,7 +17,8 @@ if (argv[0] === 'help' || argv[0] === '--help') {
   Usage: <output path> [prisma schema file]
 
   Options:
-    --declarationsOnly  Output type declarations only instead of full TypeScript file
+    --declarationsOnly          Output type declarations only instead of full TypeScript file
+    --generateInsertionTypes    Output interfaces for data to be inserted to a database
   `)
   exit(0)
 }
@@ -44,10 +45,11 @@ if (argv.length < 2 || argv[1] === '--declarationsOnly') {
 }
 
 let declarationsOnly = argv.includes('--declarationsOnly')
+let generateInsertionTypes = argv.includes('--generateInsertionTypes')
 
 try {
   console.log('Generating types...')
-  await generateTypes(schemaLocation, outputPath, declarationsOnly)
+  await generateTypes(schemaLocation, outputPath, declarationsOnly, generateInsertionTypes)
   console.log('Done!')
 } catch (e) {
   console.error(e)
