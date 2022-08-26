@@ -19,6 +19,7 @@ if (argv[0] === 'help' || argv[0] === '--help') {
   Options:
     --declarationsOnly          Output type declarations only instead of full TypeScript file
     --generateInsertionTypes    Output interfaces for data to be inserted to a database
+    --useType                   Use type instead of interface
   `)
   exit(0)
 }
@@ -44,12 +45,20 @@ if (argv.length < 2 || argv[1] === '--declarationsOnly') {
   schemaLocation = argv[1]
 }
 
-let declarationsOnly = argv.includes('--declarationsOnly')
-let generateInsertionTypes = argv.includes('--generateInsertionTypes')
+const declarationsOnly = argv.includes('--declarationsOnly')
+const generateInsertionTypes = argv.includes('--generateInsertionTypes')
+const useType = argv.includes('--useType')
+
 
 try {
   console.log('Generating types...')
-  await generateTypes(schemaLocation, outputPath, declarationsOnly, generateInsertionTypes)
+  await generateTypes(
+    schemaLocation,
+    outputPath,
+    declarationsOnly,
+    generateInsertionTypes,
+    useType
+  )
   console.log('Done!')
 } catch (e) {
   console.error(e)

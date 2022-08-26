@@ -34,12 +34,13 @@ export default async function generateTypes(
   schemaPath: string,
   outputPath: string,
   generateDeclarations: boolean = false,
-  generateInsertionTypes: boolean = false
+  generateInsertionTypes: boolean = false,
+  useType: boolean = false
 ) {
   const dmmf = await getDMMF({ datamodelPath: schemaPath })
   let types = distillDMMF(dmmf, generateInsertionTypes)
   types = convertPrismaTypesToJSTypes(types, generateInsertionTypes)
-  const fileContents = createTypeFileContents(types)
+  const fileContents = createTypeFileContents(types, useType)
   writeToFile(fileContents, outputPath, generateDeclarations)
 }
 
@@ -104,7 +105,7 @@ function convertPrismaTypesToJSTypes(types: TypeTransfer, generateInsertionTypes
   }
 }
 
-function createTypeFileContents(types: TypeTransfer): string {
+function createTypeFileContents(types: TypeTransfer, useType: boolean): string {
   let fileContents = `// AUTO GENERATED FILE BY @kalissaac/prisma-typegen
 // DO NOT EDIT
 
@@ -120,7 +121,7 @@ ${prismaEnum.values.map(value => `    ${value} = '${value}',`).join('\n')}
 ${types.models
   .map(
     model => `
-export interface ${model.name} {
+export ${useType ? 'type' : 'interface'} ${model.name} ${useType ? '= ': ''}{
 ${model.fields
   .map(field => `    ${field.name}${field.required ? '' : '?'}: ${field.typeAnnotation}${field.isArray ? '[]' : ''},`)
   .join('\n')}
