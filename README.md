@@ -21,6 +21,10 @@ If using this package to generate types that will be assigned to data to be inse
 - Fields marked with a `@default` value are made optional because they are populated automatically if not provided when inserting a new data row.
 - Relation fields (marked with `@relation`) are omitted because they do not exist at the database level and therefore can't be inserted. Read more about this [here](https://www.prisma.io/docs/concepts/components/prisma-schema/relations#relation-fields)
 
+### Use `type` instead of `interface`
+
+By default, types are generated as an `interface`. If your use case requires using `type` instead, use the `--useType` flag.
+
 # Example
 
 ### Input Schema
@@ -65,7 +69,7 @@ enum Role {
 ```typescript
 export enum Role {
   USER = 'USER',
-  ADMIN = 'ADMIN'
+  ADMIN = 'ADMIN',
 }
 
 export interface User {
@@ -78,13 +82,13 @@ export interface User {
 }
 
 export interface Post {
-  id: number
-  createdAt: Date
-  updatedAt: Date
-  published: boolean
-  title: string
-  author?: User
-  authorId?: number
+  id: number,
+  createdAt: Date,
+  updatedAt: Date,
+  published: boolean,
+  title: string,
+  author?: User,
+  authorId?: number,
 }
 ```
 
@@ -93,23 +97,51 @@ export interface Post {
 ```typescript
 export enum Role {
   USER = 'USER',
-  ADMIN = 'ADMIN'
+  ADMIN = 'ADMIN',
 }
 
 export interface User {
-  id?: number
-  createdAt?: Date | string
-  email: string
-  name?: string
-  role?: Role
+  id?: number,
+  createdAt?: (Date | string),
+  email: string,
+  name?: string | null,
+  role?: Role,
 }
 
 export interface Post {
-  id?: number
-  createdAt?: Date | string
-  updatedAt: Date | string
-  published?: boolean
-  title: string
-  authorId?: number
+  id?: number,
+  createdAt?: (Date | string),
+  updatedAt: (Date | string),
+  published?: boolean,
+  title: string,
+  authorId?: number | null,
+}
+```
+
+### Generated `index.ts` (or `index.d.ts`) with `--useType` option
+
+```typescript
+export enum Role {
+  USER = 'USER',
+  ADMIN = 'ADMIN',
+}
+
+export type User = {
+  id: number,
+  createdAt: Date,
+  email: string,
+  name?: string,
+  role: Role,
+  posts: Post[],
+}
+
+export type Post = {
+  id: number,
+  createdAt: Date,
+  updatedAt: Date,
+  published: boolean,
+  title: string,
+  author?: User,
+  authorId?: number,
 }
 ```

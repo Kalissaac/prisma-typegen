@@ -11,12 +11,15 @@ interface TypeTransfer {
 
 interface Model {
   name: string
-  fields: {
-    name: string
-    typeAnnotation: string
-    required: boolean
-    isArray: boolean
-  }[]
+  fields: Field[]
+}
+
+interface Field {
+  name: string
+  typeAnnotation: string
+  required: boolean
+  isArray: boolean,
+  hasDefault: boolean
 }
 
 interface Enum {
@@ -34,12 +37,13 @@ export default async function generateTypes(
   schemaPath: string,
   outputPath: string,
   generateDeclarations: boolean = false,
-  generateInsertionTypes: boolean = false
+  generateInsertionTypes: boolean = false,
+  useType: boolean = false
 ) {
   const dmmf = await getDMMF({ datamodelPath: schemaPath })
   let types = distillDMMF(dmmf, generateInsertionTypes)
   types = convertPrismaTypesToJSTypes(types, generateInsertionTypes)
-  const fileContents = createTypeFileContents(types)
+  const fileContents = createTypeFileContents(types, useType, generateInsertionTypes)
   writeToFile(fileContents, outputPath, generateDeclarations)
 }
 
@@ -64,8 +68,9 @@ function distillDMMF(dmmf: DMMF.Document, generateInsertionTypes: boolean): Type
         .map(f => ({
           name: f.name,
           typeAnnotation: f.type,
-          required: f.isRequired && (generateInsertionTypes ? !f.hasDefaultValue : true),
-          isArray: f.isList
+          required: f.isRequired,
+          isArray: f.isList,
+          hasDefault: f.hasDefaultValue
         }))
     })
   })
@@ -84,7 +89,7 @@ function convertPrismaTypesToJSTypes(types: TypeTransfer, generateInsertionTypes
     ['Json', 'any'],
     ['Bytes', 'Buffer']
   ])
-  PrismaTypesMap.set('DateTime', generateInsertionTypes ? 'Date | string' : 'Date')
+  PrismaTypesMap.set('DateTime', generateInsertionTypes ? '(Date | string)' : 'Date')
 
   const models = types.models.map(model => {
     const fields = model.fields.map(field => ({
@@ -104,7 +109,7 @@ function convertPrismaTypesToJSTypes(types: TypeTransfer, generateInsertionTypes
   }
 }
 
-function createTypeFileContents(types: TypeTransfer): string {
+function createTypeFileContents(types: TypeTransfer, useType: boolean, generateInsertionTypes: boolean): string {
   let fileContents = `// AUTO GENERATED FILE BY @kalissaac/prisma-typegen
 // DO NOT EDIT
 
@@ -120,15 +125,21 @@ ${prismaEnum.values.map(value => `    ${value} = '${value}',`).join('\n')}
 ${types.models
   .map(
     model => `
-export interface ${model.name} {
+export ${useType ? 'type' : 'interface'} ${model.name} ${useType ? '= ': ''}{
 ${model.fields
-  .map(field => `    ${field.name}${field.required ? '' : '?'}: ${field.typeAnnotation}${field.isArray ? '[]' : ''},`)
+  .map(field => createFieldLine(field, generateInsertionTypes))
   .join('\n')}
 }`
   )
   .join('\n')}
 `
   return fileContents
+}
+
+function createFieldLine(field: Field, generateInsertionTypes: boolean) {
+  return generateInsertionTypes
+  ? `    ${field.name}${field.required && !field.hasDefault ? '' : '?'}: ${field.typeAnnotation}${field.isArray ? '[]' : ''}${field.required ? '' : ' | null'},`
+  : `    ${field.name}${field.required ? '' : '?'}: ${field.typeAnnotation}${field.isArray ? '[]' : ''},`
 }
 
 async function writeToFile(contents: string, outputPath: string, generateDeclarations: boolean) {
