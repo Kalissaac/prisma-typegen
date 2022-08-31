@@ -69,7 +69,7 @@ enum Role {
 ```typescript
 export enum Role {
   USER = 'USER',
-  ADMIN = 'ADMIN'
+  ADMIN = 'ADMIN',
 }
 
 export interface User {
@@ -82,13 +82,13 @@ export interface User {
 }
 
 export interface Post {
-  id: number
-  createdAt: Date
-  updatedAt: Date
-  published: boolean
-  title: string
-  author?: User
-  authorId?: number
+  id: number,
+  createdAt: Date,
+  updatedAt: Date,
+  published: boolean,
+  title: string,
+  author?: User,
+  authorId?: number,
 }
 ```
 
@@ -97,24 +97,24 @@ export interface Post {
 ```typescript
 export enum Role {
   USER = 'USER',
-  ADMIN = 'ADMIN'
+  ADMIN = 'ADMIN',
 }
 
 export interface User {
-  id?: number
-  createdAt?: Date | string
-  email: string
-  name?: string
-  role?: Role
+  id?: number,
+  createdAt?: (Date | string),
+  email: string,
+  name?: string | null,
+  role?: Role,
 }
 
 export interface Post {
-  id?: number
-  createdAt?: Date | string
-  updatedAt: Date | string
-  published?: boolean
-  title: string
-  authorId?: number
+  id?: number,
+  createdAt?: (Date | string),
+  updatedAt: (Date | string),
+  published?: boolean,
+  title: string,
+  authorId?: number | null,
 }
 ```
 
@@ -123,25 +123,25 @@ export interface Post {
 ```typescript
 export enum Role {
   USER = 'USER',
-  ADMIN = 'ADMIN'
+  ADMIN = 'ADMIN',
 }
 
 export type User = {
-  id: number
-  createdAt: Date
-  email: string
-  name?: string
-  role: Role
-  posts: Post[]
+  id: number,
+  createdAt: Date,
+  email: string,
+  name?: string,
+  role: Role,
+  posts: Post[],
 }
 
 export type Post = {
-  id: number
-  createdAt: Date
-  updatedAt: Date
-  published: boolean
-  title: string
-  author?: User
-  authorId?: number
+  id: number,
+  createdAt: Date,
+  updatedAt: Date,
+  published: boolean,
+  title: string,
+  author?: User,
+  authorId?: number,
 }
 ```
