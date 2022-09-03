@@ -1,6 +1,6 @@
 {
   "name": "@kalissaac/prisma-typegen",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "Generates full types (including relations) for TypeScript from a Prisma schema",
   "exports": "./lib/index.js",
   "type": "module",
