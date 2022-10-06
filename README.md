@@ -5,8 +5,9 @@ Generates full types (including relations) for TypeScript from a Prisma schema
 # Usage
 
 ```sh-session
-$ npx @kalissaac/prisma-typegen <output folder> [prisma schema file] [--onlyDeclarations] [--generateInsertionTypes]
+$ npx @kalissaac/prisma-typegen <output path> [prisma schema file] [--onlyDeclarations] [--generateInsertionTypes]
 $ npx @kalissaac/prisma-typegen ./interfaces ./schema.prisma
+$ npx @kalissaac/prisma-typegen ./interfaces/prismaTypes.ts ./schema.prisma
 ```
 
 ### Only output declarations
@@ -25,6 +26,7 @@ If using this package to generate types that will be assigned to data to be inse
 
 By default, types are generated as an `interface`. If your use case requires using `type` instead, use the `--useType` flag.
 
+<!-- prettier-ignore-start -->
 # Example
 
 ### Input Schema
@@ -145,3 +147,4 @@ export type Post = {
   authorId?: number,
 }
 ```
+<!-- prettier-ignore-end -->

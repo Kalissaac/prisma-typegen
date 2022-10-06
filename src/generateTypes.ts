@@ -144,8 +144,15 @@ function createFieldLine(field: Field, generateInsertionTypes: boolean) {
 
 async function writeToFile(contents: string, outputPath: string, generateDeclarations: boolean) {
   try {
-    await mkdir(outputPath, { recursive: true })
-    await writeFile(join(outputPath, generateDeclarations ? 'index.d.ts' : 'index.ts'), contents, {
+    let directoryPath = outputPath
+    let filePath = outputPath
+    if (!outputPath.endsWith('.ts')) {
+      filePath = join(outputPath, generateDeclarations ? 'index.d.ts' : 'index.ts')
+    } else {
+      directoryPath = outputPath.split('/').slice(0, -1).join('/')
+    }
+    await mkdir(directoryPath, { recursive: true })
+    await writeFile(filePath, contents, {
       encoding: 'utf8'
     })
   } catch (e) {
