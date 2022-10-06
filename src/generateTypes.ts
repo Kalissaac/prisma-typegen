@@ -18,7 +18,7 @@ interface Field {
   name: string
   typeAnnotation: string
   required: boolean
-  isArray: boolean,
+  isArray: boolean
   hasDefault: boolean
 }
 
@@ -125,10 +125,8 @@ ${prismaEnum.values.map(value => `    ${value} = '${value}',`).join('\n')}
 ${types.models
   .map(
     model => `
-export ${useType ? 'type' : 'interface'} ${model.name} ${useType ? '= ': ''}{
-${model.fields
-  .map(field => createFieldLine(field, generateInsertionTypes))
-  .join('\n')}
+export ${useType ? 'type' : 'interface'} ${model.name} ${useType ? '= ' : ''}{
+${model.fields.map(field => createFieldLine(field, generateInsertionTypes)).join('\n')}
 }`
   )
   .join('\n')}
@@ -138,8 +136,10 @@ ${model.fields
 
 function createFieldLine(field: Field, generateInsertionTypes: boolean) {
   return generateInsertionTypes
-  ? `    ${field.name}${field.required && !field.hasDefault ? '' : '?'}: ${field.typeAnnotation}${field.isArray ? '[]' : ''}${field.required ? '' : ' | null'},`
-  : `    ${field.name}${field.required ? '' : '?'}: ${field.typeAnnotation}${field.isArray ? '[]' : ''},`
+    ? `    ${field.name}${field.required && !field.hasDefault ? '' : '?'}: ${field.typeAnnotation}${
+        field.isArray ? '[]' : ''
+      }${field.required ? '' : ' | null'},`
+    : `    ${field.name}${field.required ? '' : '?'}: ${field.typeAnnotation}${field.isArray ? '[]' : ''},`
 }
 
 async function writeToFile(contents: string, outputPath: string, generateDeclarations: boolean) {

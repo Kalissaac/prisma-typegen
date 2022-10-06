@@ -49,16 +49,9 @@ const declarationsOnly = argv.includes('--declarationsOnly')
 const generateInsertionTypes = argv.includes('--generateInsertionTypes')
 const useType = argv.includes('--useType')
 
-
 try {
   console.log('Generating types...')
-  await generateTypes(
-    schemaLocation,
-    outputPath,
-    declarationsOnly,
-    generateInsertionTypes,
-    useType
-  )
+  await generateTypes(schemaLocation, outputPath, declarationsOnly, generateInsertionTypes, useType)
   console.log('Done!')
 } catch (e) {
   console.error(e)
